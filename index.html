@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeTerm — The terminal that vibes</title>
+  <meta name="description" content="A terminal emulator that plays YouTube videos in the background. Code with vibes.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: rgba(0, 255, 65, 0.15);
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --text: #e0e0e0;
+      --text-dim: #888;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0,255,65,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: 0 0 40px rgba(0,255,65,0.3);
+      margin-bottom: 0.5rem;
+    }
+
+    .logo .cursor {
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .tagline {
+      font-size: 1.5rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: var(--green);
+      color: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0,255,65,0.4);
+    }
+
+    .cta-sub {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    /* Preview */
+    .preview {
+      margin-top: 3rem;
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 16/10;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-placeholder {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+      font-size: 1rem;
+    }
+
+    /* Features */
+    .features {
+      padding: 6rem 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .features h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      color: var(--green);
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .feature-card h3 {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--green);
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    /* Commands */
+    .commands {
+      padding: 4rem 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .commands h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      color: var(--green);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .terminal-block {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .terminal-block .prompt { color: var(--green); }
+    .terminal-block .cmd { color: var(--text); }
+    .terminal-block .comment { color: var(--text-dim); }
+
+    /* Shortcuts */
+    .shortcuts {
+      padding: 4rem 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .shortcuts h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      color: var(--green);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .shortcut-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-radius: 8px;
+    }
+
+    .shortcut-row kbd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--green);
+      background: var(--green-dim);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .shortcut-row span {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* Requirements */
+    .requirements {
+      padding: 4rem 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .requirements h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      color: var(--green);
+      margin-bottom: 1.5rem;
+    }
+
+    .requirements p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .requirements code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: var(--green);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    footer a {
+      color: var(--green);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="logo">$vterm<span class="cursor">|</span></div>
+    <p class="tagline">A terminal that plays YouTube in the background. Code with vibes.</p>
+    <a href="https://github.com/bixis/vibeterm-site/releases/latest/download/VibeTerm-0.1.0-arm64.dmg" class="cta">
+      Download for macOS
+    </a>
+    <p class="cta-sub">macOS arm64 (Apple Silicon) &middot; v0.1.0 &middot; Requires <a href="https://github.com/yt-dlp/yt-dlp" style="color:var(--green)">yt-dlp</a></p>
+
+    <div class="preview">
+      <span class="preview-placeholder">[ screenshot or video coming soon ]</span>
+    </div>
+  </section>
+
+  <section class="features">
+    <h2>// features</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Real terminal</h3>
+        <p>Full PTY under the hood. zsh, tmux, vim, neovim, htop — everything works. It's a real terminal, not a gimmick.</p>
+      </div>
+      <div class="feature-card">
+        <h3>YouTube background</h3>
+        <p>Paste any YouTube URL and it plays behind your terminal. Lo-fi beats, tutorials, live streams — whatever sets your mood.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Boss mode</h3>
+        <p>One shortcut hides the video instantly. Your terminal looks completely normal. Your secret is safe.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Watch mode</h3>
+        <p>Toggle watch mode to clear the screen and enjoy the video. Toggle back and your session is exactly where you left it.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Smart overlay</h3>
+        <p>Dark highlights only on lines with text. Empty space shows the full video. Switch between row, frosted, or no overlay.</p>
+      </div>
+      <div class="feature-card">
+        <h3>CLI controls</h3>
+        <p>Control everything from the command line. Play, pause, volume, transparency — all with short commands like <code>vibeterm p</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="commands">
+    <h2>// commands</h2>
+    <div class="terminal-block">
+      <span class="prompt">$</span> <span class="cmd">vibeterm p "https://youtube.com/..."</span> <span class="comment"># play video</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm p "https://..." -a</span> <span class="comment"># audio only</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm pa</span> <span class="comment"># pause</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm v 40</span> <span class="comment"># volume 40%</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm w</span> <span class="comment"># watch mode</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm b</span> <span class="comment"># boss mode</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm t 60</span> <span class="comment"># transparency 60%</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm mode frosted</span> <span class="comment"># frosted glass</span><br>
+      <span class="prompt">$</span> <span class="cmd">vibeterm f 18</span> <span class="comment"># font size 18px</span><br>
+    </div>
+  </section>
+
+  <section class="shortcuts">
+    <h2>// shortcuts</h2>
+    <div class="shortcut-list">
+      <div class="shortcut-row"><kbd>Cmd+Shift+H</kbd> <span>Boss mode (hide video)</span></div>
+      <div class="shortcut-row"><kbd>Cmd+Shift+Y</kbd> <span>URL input bar</span></div>
+      <div class="shortcut-row"><kbd>Cmd+Shift+&rarr;</kbd> <span>Forward 15s</span></div>
+      <div class="shortcut-row"><kbd>Cmd+Shift+&larr;</kbd> <span>Back 15s</span></div>
+      <div class="shortcut-row"><kbd>Cmd+Shift+&uarr;</kbd> <span>Volume up</span></div>
+      <div class="shortcut-row"><kbd>Cmd+Shift+&darr;</kbd> <span>Volume down</span></div>
+    </div>
+  </section>
+
+  <section class="requirements">
+    <h2>// setup</h2>
+    <p>1. Install yt-dlp (needed to fetch YouTube streams):</p>
+    <p><code>brew install yt-dlp</code></p>
+    <p>2. Download VibeTerm, open the .dmg, drag to Applications.</p>
+    <p>3. First launch: right-click > Open (macOS will warn once about unidentified developer).</p>
+  </section>
+
+  <footer>
+    Built by <a href="https://github.com/bixis">@bixis</a>
+  </footer>
+
+</body>
+</html>
